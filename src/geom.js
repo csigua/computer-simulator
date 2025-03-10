@@ -48,7 +48,7 @@ scene.background = new THREE.Color( 'black' );
 
 // cubes functions/variables
 function makeInstance(geometry, color, x, y, z) {
-	const material = new THREE.MeshPhongMaterial({color, shininess: 10});
+	const material = new THREE.MeshPhongMaterial({color, shininess: 40});
    
 	const cube = new THREE.Mesh(geometry, material);
 	// shadows
@@ -239,7 +239,7 @@ function onDocumentKeyDown(ev) {
 	  lineHeight
 	);
 
-	console.log(inputString);
+	// console.log(inputString);
 	
     tex.needsUpdate = true;
 }
@@ -271,10 +271,17 @@ function drawAllText(ctx, text, x, y, maxWidth, lineHeight) {
 function wrapText(ctx, text, x, startY, maxWidth, lineHeight) {
 	const paragraphs = text.split('\n');
 	let y = startY;
-  
-	paragraphs.forEach(paragraph => {
-	  y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
-	});
+
+	if (paragraphs.length > 15) {
+		paragraphs.slice(-15).forEach(paragraph => {
+			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
+		  });
+	}
+	else {
+		paragraphs.forEach(paragraph => {
+			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
+		  });
+	}
   }
 
 document.addEventListener("keyup", onDocumentKeyUp, false);
@@ -473,15 +480,11 @@ function drawSpheres() {
 // }
 
 const gui = new GUI();
-// gui.add(camera, 'fov', 1, 180);
-// const minMaxGUIHelper = new MinMaxGUIHelper(camera, 'near', 'far', 0.1);
-// // gui.add(minMaxGUIHelper, 'min', 0.1, 50, 0.1).name('near').onChange(updateCamera);
-// // gui.add(minMaxGUIHelper, 'max', 0.1, 50, 0.1).name('far').onChange(updateCamera);
-// gui.add(minMaxGUIHelper, 'min', 0.00001, 500, 0.00001).name('near');
 const minMaxGUIHelper = new MinMaxGUIHelper( camera, 'near', 'far', 0.1 );
 gui.add( minMaxGUIHelper, 'min', 0.1, 50, 0.1 ).name( 'near' );
-gui.add( minMaxGUIHelper, 'max', 0.1, 50, 0.1 ).name( 'far' );
+gui.add( minMaxGUIHelper, 'max', 0.1, 2000, 0.1 ).name( 'far' );
 
+// render everything
 // render everything
 function render() {
 
@@ -498,8 +501,27 @@ function render() {
 
 	requestAnimationFrame( render );
 
-	screenLight.intensity = inputString.replaceAll(" ", "").length * 3;
-
+	// render screenlight intensity based on number of characters on screen
+	let lineCount = 0;
+	for (const _ of inputString.split('\n')) {
+		lineCount += 1;
+	}
+	// split each chunk into 49-character pieces if necessary
+	let chunks = inputString.split('\n').slice(-15);
+	let allLines = [];
+	for (const c of chunks) {
+		for (let i = 0; i < c.length; i += 49) {
+			let piece = c.slice(i, i+49);
+			allLines.push(piece);
+		}
+	}
+	if (lineCount > 15) {
+		let visibleLines = allLines.slice(-15).join('\n');
+		screenLight.intensity = visibleLines.replaceAll(" ", "").length * 3;
+	}
+	else {
+		screenLight.intensity = inputString.replaceAll(" ", "").length * 3;
+	}
 }
 
 function main() {
@@ -510,7 +532,7 @@ function main() {
 	drawPointLight(0xFFFFFF, 1000, [-17.6, 12, -9.6]);
 	// light up the lightbulb
 	drawLampLight(0xFFFFFF, 2000);
-	console.log(inputString.length);
+	// console.log(inputString.length);
 	drawScreenLight(0x00FF00, 0);
 	loadBackground();
 	loadObject();
