@@ -231,12 +231,13 @@ function onDocumentKeyDown(ev) {
 
 	// “wrap” the input string in multiple lines
 	wrapText(
-	  ctx,
-	  inputString + "_",
-	  c.width * 0.05, // x
-	  c.height * 0.1, // y
-	  maxTextWidth,
-	  lineHeight
+		ctx,
+		//   inputString + "_",
+		inputString,
+		c.width * 0.05, // x
+		c.height * 0.1, // y
+		maxTextWidth,
+		lineHeight
 	);
 
 	// console.log(inputString);
@@ -249,17 +250,8 @@ function drawAllText(ctx, text, x, y, maxWidth, lineHeight) {
 	let line = '';
   
 	for (let i = 0; i < words.length; i++) {
-	  const testLine = line + words[i];
-	  const metrics = ctx.measureText(testLine);
-  
-	  if (metrics.width > maxWidth && i > 0) {
-		ctx.fillText(line, x, y);
-		ctx.strokeText(line, x, y);
-		line = words[i];
-		y += lineHeight;
-	  } else {
+	  	const testLine = line + words[i];
 		line = testLine;
-	  }
 	}
   
 	ctx.fillText(line, x, y);
@@ -269,16 +261,28 @@ function drawAllText(ctx, text, x, y, maxWidth, lineHeight) {
   }
   
 function wrapText(ctx, text, x, startY, maxWidth, lineHeight) {
-	const paragraphs = text.split('\n');
 	let y = startY;
 
-	if (paragraphs.length > 15) {
-		paragraphs.slice(-15).forEach(paragraph => {
+	text = text + "_";
+
+	let chunks = text.split('\n');
+	let allLines = [];
+	for (const c of chunks) {
+		for (let i = 0; i < c.length; i += 48) {
+			let piece = c.slice(i, i+48);
+			allLines.push(piece);
+		}
+	}
+
+	console.log(allLines);
+
+	if (allLines.length > 15) {
+		allLines.slice(-15).forEach(paragraph => {
 			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
 		  });
 	}
 	else {
-		paragraphs.forEach(paragraph => {
+		allLines.forEach(paragraph => {
 			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
 		  });
 	}
@@ -502,12 +506,10 @@ function render() {
 	requestAnimationFrame( render );
 
 	// render screenlight intensity based on number of characters on screen
-	let lineCount = 0;
-	for (const _ of inputString.split('\n')) {
-		lineCount += 1;
-	}
 	// split each chunk into 49-character pieces if necessary
-	let chunks = inputString.split('\n').slice(-15);
+
+	let text = inputString + "_";
+	let chunks = text.split('\n');
 	let allLines = [];
 	for (const c of chunks) {
 		for (let i = 0; i < c.length; i += 49) {
@@ -515,12 +517,13 @@ function render() {
 			allLines.push(piece);
 		}
 	}
-	if (lineCount > 15) {
+
+	if (allLines.length > 15) {
 		let visibleLines = allLines.slice(-15).join('\n');
-		screenLight.intensity = visibleLines.replaceAll(" ", "").length * 3;
+		screenLight.intensity = visibleLines.replaceAll(" ", "").length * 20;
 	}
 	else {
-		screenLight.intensity = inputString.replaceAll(" ", "").length * 3;
+		screenLight.intensity = text.replaceAll(" ", "").length * 20;
 	}
 }
 
