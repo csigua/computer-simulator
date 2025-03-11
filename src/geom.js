@@ -634,19 +634,21 @@ function render() {
 
 	renderer.render( scene, camera );
 
-	if (heldUp) {
-		manual.scale.set(0.1,0.1,0.1);
-		manual.position.x = camera.position.x + camera.getWorldDirection(controls.target).x*2.2;
-		manual.position.y = camera.position.y + camera.getWorldDirection(controls.target).y*2.2;
-		manual.position.z = camera.position.z + camera.getWorldDirection(controls.target).z*2.2;
-		manual.quaternion.copy(camera.quaternion);
-	}
-	else {
-		manual.scale.set(1,1,1);
-		manual.position.set(0, 0.51, 10);
-		manual.rotation.x = -Math.PI/2;
-		manual.rotation.z = -Math.PI/20;
-		manual.rotation.y = 0;
+	if (manual) {
+		if (heldUp) {
+			manual.scale.set(0.1,0.1,0.1);
+			manual.position.x = camera.position.x + camera.getWorldDirection(controls.target).x*2.2;
+			manual.position.y = camera.position.y + camera.getWorldDirection(controls.target).y*2.2;
+			manual.position.z = camera.position.z + camera.getWorldDirection(controls.target).z*2.2;
+			manual.quaternion.copy(camera.quaternion);
+		}
+		else {
+			manual.scale.set(1,1,1);
+			manual.position.set(0, 0.51, 10);
+			manual.rotation.x = -Math.PI/2;
+			manual.rotation.z = -Math.PI/20;
+			manual.rotation.y = 0;
+		}
 	}
 	
 	// render screenlight intensity based on number of characters on screen
