@@ -111,7 +111,7 @@ let shiftMap = new Map([
 ]);
 
 const cubes = [];
-const keyboardCoords = [-12,2,-4];
+const keyboardCoords = [-11,2,-7];
 
 const board = new THREE.BoxGeometry(boxWidth * 17, boxHeight * 0.9, boxDepth * 6.5);
 makeInstance(board, boardColor, keyboardCoords[0] + 11.5, keyboardCoords[1] - 0.7, keyboardCoords[2] + 2.2);
@@ -232,7 +232,6 @@ function onDocumentKeyDown(ev) {
 	// “wrap” the input string in multiple lines
 	wrapText(
 		ctx,
-		//   inputString + "_",
 		inputString,
 		c.width * 0.05, // x
 		c.height * 0.1, // y
@@ -258,31 +257,39 @@ function drawAllText(ctx, text, x, y, maxWidth, lineHeight) {
 	ctx.strokeText(line, x, y);
   
 	return y + lineHeight;
-  }
+}
   
 function wrapText(ctx, text, x, startY, maxWidth, lineHeight) {
 	let y = startY;
 
 	text = text + "_";
 
-	let chunks = text.split('\n');
-	let allLines = [];
+	// let chunks = text.split("\n");
+	let chunks = text.split(/(?=\n)/);
+	let typedLines = [];
 	for (const c of chunks) {
 		for (let i = 0; i < c.length; i += 48) {
 			let piece = c.slice(i, i+48);
-			allLines.push(piece);
+			if (piece === "\n_") {
+				piece = '_';
+			}
+			if (piece === "\n") {
+				piece = '';
+			}
+			if (piece[0] === "\n") {
+				piece = piece.substring(1);
+			}
+			typedLines.push(piece);
 		}
 	}
 
-	console.log(allLines);
-
-	if (allLines.length > 15) {
-		allLines.slice(-15).forEach(paragraph => {
+	if (typedLines.length > 15) {
+		typedLines.slice(-15).forEach(paragraph => {
 			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
 		  });
 	}
 	else {
-		allLines.forEach(paragraph => {
+		typedLines.forEach(paragraph => {
 			y = drawAllText(ctx, paragraph, x, y, maxWidth, lineHeight);
 		  });
 	}
@@ -297,6 +304,7 @@ function onDocumentKeyUp(ev) {
 	}
 }
 
+let screenCoords = [0, 12, -24];
 // draw the screen
 const screenGeom = new THREE.PlaneGeometry(32, 18);
 const screenMat = new THREE.MeshPhongMaterial({
@@ -309,8 +317,31 @@ const screenMat = new THREE.MeshPhongMaterial({
 });
 
 const screen = new THREE.Mesh(screenGeom, screenMat);
-screen.position.set(0, 12, -25);
+screen.position.set(screenCoords[0], screenCoords[1], screenCoords[2]);
 scene.add(screen);
+
+let monitorThickness = 1;
+
+// DRAW MONITOR
+
+let monitorMaterial = new THREE.MeshPhongMaterial( {color: 0xF5F5DC });
+let monitorLatGeom = new THREE.BoxGeometry(monitorThickness * 34, monitorThickness, monitorThickness);
+let monitorLngGeom = new THREE.BoxGeometry(monitorThickness * 2, monitorThickness * 18, monitorThickness);
+let monitorCoverGeom = new THREE.BoxGeometry(monitorThickness * 34, monitorThickness * 18, monitorThickness);
+
+buildPart(monitorLatGeom, monitorMaterial, 0, 8.5, 0);
+buildPart(monitorLatGeom, monitorMaterial, 0, -8.5, 0);
+buildPart(monitorLngGeom, monitorMaterial, -16, 0, 0);
+buildPart(monitorLngGeom, monitorMaterial, 16, 0, 0);
+buildPart(monitorCoverGeom, monitorMaterial, 0, 0, -0.6);
+
+function buildPart(geom, mat, x, y, z) {
+	const part = new THREE.Mesh(geom, mat);
+	part.castShadow = true;
+	part.receiveShadow = true;
+	part.position.set(screenCoords[0] + x, screenCoords[1] + y, screenCoords[2] + z);
+	scene.add(part);
+}
 
 // draw ground plane
 function drawPlane() {
@@ -477,12 +508,6 @@ function drawSpheres() {
 	}
 }
 
-// CAMERA CONTROLS
-
-// function updateCamera() {
-// 	camera.updateProjectionMatrix();
-// }
-
 const gui = new GUI();
 const minMaxGUIHelper = new MinMaxGUIHelper( camera, 'near', 'far', 0.1 );
 gui.add( minMaxGUIHelper, 'min', 0.1, 50, 0.1 ).name( 'near' );
@@ -509,22 +534,26 @@ function render() {
 	// split each chunk into 49-character pieces if necessary
 
 	let text = inputString + "_";
-	let chunks = text.split('\n');
+	let chunks = text.split(/(?=\n)/);
 	let allLines = [];
 	for (const c of chunks) {
 		for (let i = 0; i < c.length; i += 49) {
 			let piece = c.slice(i, i+49);
+			if (piece === "\n_") {
+				piece = '_';
+			}
+			if (piece === "\n") {
+				piece = '';
+			}
+			if (piece[0] === "\n") {
+				piece = piece.substring(1);
+			}
 			allLines.push(piece);
 		}
 	}
 
-	if (allLines.length > 15) {
-		let visibleLines = allLines.slice(-15).join('\n');
-		screenLight.intensity = visibleLines.replaceAll(" ", "").length * 20;
-	}
-	else {
-		screenLight.intensity = text.replaceAll(" ", "").length * 20;
-	}
+	let visibleLines = allLines.slice(-15).join('');
+	screenLight.intensity = (visibleLines.replaceAll(" ", "").length) * 2;
 }
 
 function main() {
