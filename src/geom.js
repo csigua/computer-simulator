@@ -18,7 +18,7 @@ renderer.shadowMap.enabled = true;
 
 // raycaster array for objects
 let intersects = [];
-let manual;
+let manual = new THREE.Object3D();
 
 // texture loader
 const loader = new THREE.TextureLoader();
