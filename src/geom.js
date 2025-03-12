@@ -24,9 +24,9 @@ let manual = new THREE.Object3D();
 const loader = new THREE.TextureLoader();
 
 // key colors
-const keyColor = 0x202020;
-const noKeyColor = 0x120202;
-const boardColor = 0x111111;
+const keyColor = 0x404040;
+const noKeyColor = 0x800000;
+const boardColor = 0x393939;
 
 let screenColor = 0x00FF00;
 
@@ -321,14 +321,14 @@ function onDocumentKeyDown(ev) {
 			if (command.substring(0,11) === "time night_") {
 				inputString += "Time set to night.\n";
 				bg = 1;
-				skyLightColor = 0x443939;
-				skyLightIntensity = 0.2;
+				skyLightColor = 0x393955;
+				skyLightIntensity = 0.3;
 			}
 			else if (command.substring(0,9) === "time day_") {
 				inputString += "Time set to day.\n";
 				bg = 0;
 				skyLightColor = 0xBBCCCC;
-				skyLightIntensity = 10;
+				skyLightIntensity = 5;
 			}
 		}
 	}
@@ -757,7 +757,6 @@ function render() {
 function main() {
 
 	drawPlane();
-	drawSkyLight();
 	drawDirectionalLight(0xbbcccc, 4, [5, 10, -2]);
 	drawPointLight([-17.6, 12, -9.6]);
 	// light up the lightbulb
