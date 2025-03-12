@@ -67,6 +67,8 @@ function makeInstance(geometry, color, x, y, z) {
 	return cube;
 }
 
+let bg = 0;
+
 const boxWidth = 2;
 const boxHeight = 2;
 const boxDepth = 2;
@@ -304,6 +306,20 @@ function onDocumentKeyDown(ev) {
 				inputString += "Screen color set.\n";
 			}
 		}
+		if (command.substring(0,5) === "time ") {
+			if (command.substring(0,11) === "time night_") {
+				inputString += "Time set to night.\n";
+				bg = 1;
+				skyLightColor = 0x443939;
+				skyLightIntensity = 0.2;
+			}
+			else if (command.substring(0,9) === "time day_") {
+				inputString += "Time set to day.\n";
+				bg = 0;
+				skyLightColor = 0xBBCCCC;
+				skyLightIntensity = 10;
+			}
+		}
 	}
 	else {
 		let letter;
@@ -502,15 +518,15 @@ function drawSkyLight() {
 	scene.add( light );
 }
 
+let skyLightColor = 0xBBCCCC;
+let skyLightIntensity = 10;
+let skyLight = new THREE.DirectionalLight( skyLightColor, 3 );
+
 // sky directional light (like the sun)
-function drawDirectionalLight(col, int, pos) {
-	const color = col;
-	const intensity = int;
-	const light = new THREE.DirectionalLight( color, intensity );
-	// shadows
-	light.castShadow = true;
-	light.position.set( camera.position.x, camera.position.y, camera.position.z );
-	scene.add( light );
+function drawDirectionalLight() {
+	skyLight.castShadow = true;
+	skyLight.position.set( camera.position.x, camera.position.y, camera.position.z );
+	scene.add(skyLight);
 	// scene.add( camera.target );
 }
 
@@ -582,20 +598,42 @@ function loadObject() {
 	} );
 }
 
-// load skybox
-function loadBackground() {
+// cube map method
+const cubeLoader = new THREE.CubeTextureLoader();
+const nightSkybox = cubeLoader.setPath('textures/skybox-night/').load( [
+	'posx.jpg',
+	'negx.jpg',
+	'posy.jpg',
+	'negy.jpg',
+	'posz.jpg',
+	'negz.jpg'
+] );
+const daySkybox = cubeLoader.setPath('textures/skybox-day/').load( [
+	'posx.jpg',
+	'negx.jpg',
+	'posy.jpg',
+	'negy.jpg',
+	'posz.jpg',
+	'negz.jpg'
+] );
 
-	// cube map method
-	const cubeLoader = new THREE.CubeTextureLoader();
-	const texture1 = cubeLoader.setPath('textures/skybox/').load( [
-		'posx.jpg',
-		'negx.jpg',
-		'posy.jpg',
-		'negy.jpg',
-		'posz.jpg',
-		'negz.jpg'
-	] );
-	scene.background = texture1;
+// load skybox
+function loadBackgrounds(bg) {
+	if (bg === 0) {
+		scene.background = daySkybox;
+	}
+	else {
+		scene.background = nightSkybox;
+	}
+}
+
+function updateBackgrounds(bg) {
+	if ((scene.background == daySkybox) && (bg === 1)) {
+		scene.background = nightSkybox;
+	}
+	else if ((scene.background == nightSkybox) && (bg === 0)) {
+		scene.background = daySkybox;
+	}
 }
 
 function resizeRendererToDisplaySize( renderer ) {
@@ -687,19 +725,24 @@ function render() {
 	// control screen
 	ctx.fillStyle = hexToRgbA(screenColor.toString(16).toUpperCase().padStart(6, '0'));
 	screenLight.color.set(screenColor);
+
+	// control environment
+	skyLight.color.set(skyLightColor);
+	skyLight.intensity = skyLightIntensity;
+	updateBackgrounds(bg);
 }
 
 function main() {
 
 	drawPlane();
 	drawSkyLight();
-	drawDirectionalLight(0x552200, 4, [5, 10, -2]);
+	drawDirectionalLight(0xbbcccc, 4, [5, 10, -2]);
 	drawPointLight([-17.6, 12, -9.6]);
 	// light up the lightbulb
 	drawLampLight();
 	// console.log(inputString.length);
 	drawScreenLight(0x00FF00, 0);
-	loadBackground();
+	loadBackgrounds(0);
 	loadObject();
 	// drawSpheres();
 
