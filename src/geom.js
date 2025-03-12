@@ -196,7 +196,7 @@ let shiftOn = false;
 let typedLines = []; // list of lines typed on the terminal
 
 // saved variables
-let savedIntensity = 0;
+let savedIntensity = 4000;
 
 function hexToRgbA(hex, alpha = 1) {
     // Ensure hex is in string format and remove the '0x' prefix if present
@@ -438,7 +438,8 @@ function buildPart(geom, mat, x, y, z) {
 let paperMaterial = new THREE.MeshPhongMaterial( {
 	color: 0xDDDD99,
 	side: THREE.FrontSide,
-	map: loader.load("/textures/usermanual.jpg")
+	// map: loader.load('/textures/usermanual.jpg')
+	map:loader.load('/textures/90732.jpg')
 } );
 
 let paperSize = 1.5;
