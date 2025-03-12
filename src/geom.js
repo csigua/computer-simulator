@@ -287,9 +287,9 @@ function onDocumentKeyDown(ev) {
 			}
 		}
 		// screen commands
-		if (command.substring(0,13) === "screen color ") {
-			if (/(0x)?([0-9a-fA-F]){6}/.test(command.substring(13,21).replaceAll("_",""))) {
-				let color = command.substring(13,21).replaceAll("_","");
+		if (command.substring(0,11) === "text color ") {
+			if (/(0x)?([0-9a-fA-F]){6}/.test(command.substring(11,19).replaceAll("_",""))) {
+				let color = command.substring(11,19).replaceAll("_","");
 				if (color.length === 6) {
 					color = "0x" + color;
 				}
@@ -303,7 +303,7 @@ function onDocumentKeyDown(ev) {
 					maxTextWidth,
 					lineHeight
 				);
-				inputString += "Screen color set.\n";
+				inputString += "Text color set.\n";
 			}
 		}
 		if (command.substring(0,5) === "time ") {
