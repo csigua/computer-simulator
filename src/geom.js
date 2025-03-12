@@ -1,9 +1,8 @@
 import * as THREE from 'three';
-import { MinMaxGUIHelper } from './guihelper.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 const canvas = document.querySelector( '#c' );
 const view1Elem = document.querySelector('#view1');
@@ -86,6 +85,7 @@ let keyMap = new Map([
 	[90,19],[88,20],[67,21],[86,22],[66,23],[78,24],[77,25], // bottom row
 	[32,26], // spacebar
 	// all other keys
+	[9,41], // tab
 	[20,42], // caps lock
 	[16,43], // shift
 	[219,44],[221,45],[220,46],[59,47],[222,48], // [, ], \, ;, ' keys
@@ -101,7 +101,7 @@ let letterMap = new Map([
     [65,"a"],[83,"s"],[68,"d"],[70,"f"],[71,"g"],[72,"h"],[74,"j"],[75,"k"],[76,"l"],[59,";"],[222,"'"],// middle row
     [90,"z"],[88,"x"],[67,"c"],[86,"v"],[66,"b"],[78,"n"],[77,"m"],[188,","],[190,"."],[191,"/"], // bottom row
     [32," "], // spacebar
-	[20,""],[16,""],[13,""] // caps lock, shift, enter
+	[20,""],[16,""],[13,""],[9,"\t"] // caps lock, shift, enter, tab
 
 ]);
 
@@ -113,7 +113,7 @@ let shiftMap = new Map([
     [65,"a"],[83,"s"],[68,"d"],[70,"f"],[71,"g"],[72,"h"],[74,"j"],[75,"k"],[76,"l"],[59,":"],[222,"\""],// middle row
     [90,"z"],[88,"x"],[67,"c"],[86,"v"],[66,"b"],[78,"n"],[77,"m"],[188,"<"],[190,">"],[191,"?"], // bottom row
     [32," "], // spacebar
-	[20,""],[16,""],[13,""] // caps lock, shift, enter
+	[20,""],[16,""],[13,""],[9,"\t"] // caps lock, shift, enter, tab
 ]);
 
 const cubes = [];
@@ -230,6 +230,36 @@ function clickHandler(ev) {
 	}
 }
 
+// LOAD ALL PLANETS
+let planet = 3;
+
+let planets = [];
+const sun = loader.load('textures/planets/sun.jpg');
+const mercury = loader.load('textures/planets/mercury.jpg');
+const venus = loader.load('textures/planets/venus.jpg');
+const earth = loader.load('textures/planets/earth.jpg');
+const mars = loader.load('textures/planets/mars.jpg');
+const jupiter = loader.load('textures/planets/jupiter.jpg');
+const saturn = loader.load('textures/planets/saturn.jpg');
+const uranus = loader.load('textures/planets/uranus.jpg');
+const neptune = loader.load('textures/planets/neptune.jpg');
+const pluto = loader.load('textures/planets/pluto.jpg');
+const moon = loader.load('textures/planets/moon.jpg');
+
+planets.push(
+    sun,
+    mercury,
+    venus,
+    earth,
+    mars,
+    jupiter,
+    saturn,
+    uranus,
+    neptune,
+    pluto,
+    moon
+);
+
 document.addEventListener("keydown", onDocumentKeyDown, false);
 function onDocumentKeyDown(ev) {
 	var keyCode = ev.which;
@@ -273,6 +303,7 @@ function onDocumentKeyDown(ev) {
 	else if (keyCode === 13) { // enter key pressed. COMMAND TIME!!
 		// lamp commands
 		let command = typedLines[typedLines.length - 1];
+		command = command.toLowerCase()
 		inputString += "\n";
 		if (command.substring(0,5) === "lamp ") {
 			// light switches
@@ -329,6 +360,43 @@ function onDocumentKeyDown(ev) {
 				bg = 0;
 				skyLightColor = 0xBBCCCC;
 				skyLightIntensity = 5;
+			}
+		}
+		// planet commands
+		if (command.substring(0,6) === "globe ") {
+			if (command.substring(0,10) === "globe sun_") {
+				inputString += "Globe now showing the sun.\n";
+				planet = 0;
+			} else if (command.substring(0,14) === "globe mercury_") {
+				inputString += "Globe now showing Mercury.\n";
+				planet = 1;
+			} else if (command.substring(0,12) === "globe venus_") {
+				inputString += "Globe now showing Venus.\n";
+				planet = 2;
+			} else if (command.substring(0,12) === "globe earth_") {
+				inputString += "Globe now showing Earth.\n";
+				planet = 3;
+			} else if (command.substring(0,11) === "globe mars_") {
+				inputString += "Globe now showing Mars.\n";
+				planet = 4;
+			} else if (command.substring(0,14) === "globe jupiter_") {
+				inputString += "Globe now showing Jupiter.\n";
+				planet = 5;
+			} else if (command.substring(0,13) === "globe saturn_") {
+				inputString += "Globe now showing Saturn.\n";
+				planet = 6;
+			} else if (command.substring(0,13) === "globe uranus_") {
+				inputString += "Globe now showing Uranus.\n";
+				planet = 7;
+			} else if (command.substring(0,14) === "globe neptune_") {
+				inputString += "Globe now showing Neptune.\n";
+				planet = 8;
+			} else if (command.substring(0,12) === "globe pluto_") {
+				inputString += "Globe now showing Pluto.\n";
+				planet = 9;
+			} else if (command.substring(0,11) === "globe moon_") {
+				inputString += "Globe now showing the Moon.\n";
+				planet = 10;
 			}
 		}
 	}
@@ -451,6 +519,73 @@ screen.position.set(screenCoords[0], screenCoords[1], screenCoords[2]);
 scene.add(screen);
 
 let monitorThickness = 1;
+
+const globeCoords = [23,0,-12];
+
+const baseGeom = new THREE.CylinderGeometry( 4, 5, 5, 32 );
+const standGeom = new THREE.CylinderGeometry(0.5, 0.5, 15, 8);
+const globeGeom = new THREE.SphereGeometry(5, 32, 32);
+const axisGeom = new THREE.CylinderGeometry(5.5,5.5,0.8,32,1,1,Math.PI,Math.PI);
+
+const standMat = new THREE.MeshPhongMaterial( {color: 0x151515} );
+const axisMat = new THREE.MeshPhongMaterial( {color: 0x525252, side: THREE.DoubleSide} );
+const globeMat = new THREE.MeshPhongMaterial( {
+	color: 0x999999,
+	map: planets[planet],
+	shininess: 100
+} );
+
+function buildGlobe(geom, mat, x, y, z) {
+	const part = new THREE.Mesh(geom, mat);
+	part.castShadow = true;
+	part.receiveShadow = true;
+	part.position.set(globeCoords[0] + x, globeCoords[1] + y, globeCoords[2] + z);
+	scene.add(part);
+}
+
+buildGlobe(baseGeom, standMat, 0, 0, 0);
+buildGlobe(standGeom, axisMat, 0, 7.5, 0);
+
+// individual axis build to control rotation
+const axis = new THREE.Mesh(axisGeom, axisMat);
+axis.castShadow = true;
+axis.receiveShadow = true;
+axis.position.set(globeCoords[0], globeCoords[1] + 9, globeCoords[2]);
+axis.rotation.set(Math.PI/2,0,Math.PI*7/8);
+scene.add(axis);
+
+function updatePlanet(planet) {
+    if (globe.material.map == sun && planet !== 0) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == mercury && planet !== 1) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == venus && planet !== 2) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == earth && planet !== 3) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == mars && planet !== 4) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == jupiter && planet !== 5) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == saturn && planet !== 6) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == uranus && planet !== 7) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == neptune && planet !== 8) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == pluto && planet !== 9) {
+        globe.material.map = planets[planet];
+    } else if (globe.material.map == moon && planet !== 10) {
+        globe.material.map = planets[planet];
+    }
+}
+
+// build globe individually so we can control the mesh
+const globe = new THREE.Mesh(globeGeom, globeMat);
+globe.castShadow = true;
+globe.receiveShadow = true;
+globe.position.set(globeCoords[0], globeCoords[1] + 9, globeCoords[2]);
+scene.add(globe);
 
 // DRAW MONITOR
 
@@ -670,7 +805,8 @@ function resizeRendererToDisplaySize( renderer ) {
 }
 
 // render everything
-function render() {
+function render(time) {
+	time *= 0.001;
 
 	if ( resizeRendererToDisplaySize( renderer ) ) {
 		const canvas = renderer.domElement;
@@ -691,7 +827,8 @@ function render() {
 	// calculate objects intersecting the picking ray
 	intersects = raycaster.intersectObjects( scene.children );
 
-	// intersects[0].object.material.color.set( 0xff0000 );
+	// rotate the globe
+	globe.rotation.y = time * 0.2;
 
 	renderer.render( scene, camera );
 
@@ -752,6 +889,10 @@ function render() {
 	skyLight.color.set(skyLightColor);
 	skyLight.intensity = skyLightIntensity;
 	updateBackgrounds(bg);
+
+	// control globe
+	updatePlanet(planet);
+	console.log(planet);
 }
 
 function main() {
