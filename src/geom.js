@@ -90,7 +90,7 @@ let keyMap = new Map([
 	[16,43], // shift
 	[219,44],[221,45],[220,46],[59,47],[222,48], // [, ], \, ;, ' keys
 	[188,49],[190,50],[191,51], // ,, ., and / keys
-	[13,52] // enter
+	[13,52], // enter
 ]);
 
 let letterMap = new Map([
@@ -245,7 +245,18 @@ function onDocumentKeyDown(ev) {
 	let maxTextWidth = c.width * 0.9;
 	let lineHeight = 60; // how much space between lines?
 
-	cubes[keyMap.get(keyCode)].position.y = yOffset;
+	if (keyCode === 16) {
+		console.log(ev.code);
+		if (ev.code === "ShiftLeft") {
+			cubes[43].position.y = yOffset;
+		}
+		else {
+			cubes[53].position.y = yOffset;
+		}
+	}
+	else {
+		cubes[keyMap.get(keyCode)].position.y = yOffset;
+	}
 
 	if (keyCode === 8) { // backspace key pressed
 		inputString = inputString.slice(0, -1);
@@ -406,7 +417,18 @@ function wrapText(ctx, text, x, startY, maxWidth, lineHeight) {
 document.addEventListener("keyup", onDocumentKeyUp, false);
 function onDocumentKeyUp(ev) {
 	var keyCode = ev.which;
-	cubes[keyMap.get(keyCode)].position.y = yOffset + 0.5;
+	if (keyCode === 16) {
+		console.log(ev.code);
+		if (ev.code === "ShiftLeft") {
+			cubes[43].position.y = yOffset + 0.5;
+		}
+		else {
+			cubes[53].position.y = yOffset + 0.5;
+		}
+	}
+	else {
+		cubes[keyMap.get(keyCode)].position.y = yOffset + 0.5;
+	}
 	if (keyCode === 16) {
 		shiftOn = false;
 	}
