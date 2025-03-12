@@ -439,7 +439,7 @@ let paperMaterial = new THREE.MeshPhongMaterial( {
 	color: 0xDDDD99,
 	side: THREE.FrontSide,
 	// map: loader.load('textures/usermanual.jpg')
-	map:loader.load('textures/90732.jpg')
+	map:loader.load('textures/usermanual.jpg')
 } );
 
 let paperSize = 1.5;
