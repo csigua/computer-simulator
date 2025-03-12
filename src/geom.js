@@ -438,8 +438,8 @@ function buildPart(geom, mat, x, y, z) {
 let paperMaterial = new THREE.MeshPhongMaterial( {
 	color: 0xDDDD99,
 	side: THREE.FrontSide,
-	// map: loader.load('/textures/usermanual.jpg')
-	map:loader.load('/textures/90732.jpg')
+	// map: loader.load('textures/usermanual.jpg')
+	map:loader.load('textures/90732.jpg')
 } );
 
 let paperSize = 1.5;
