@@ -318,10 +318,13 @@ function onDocumentKeyDown(ev) {
 			}
 			// change color
 			else if (command.substring(0,11) === "lamp color ") {
-				if (/(0x)?([0-9a-fA-F]){6}/.test(command.substring(11,19).replaceAll("_",""))) {
+				if (/(0x|#)?([0-9a-fA-F]){6}/.test(command.substring(11,19).replaceAll("_",""))) {
 					let color = command.substring(11,19).replaceAll("_","");
 					if (color.length === 6) {
 						color = "0x" + color;
+					}
+					if (color.length === 7) {
+						color = "0x" + color.substring(1);
 					}
 					lampColor = Number(color);
 					inputString += "Lamp color set.\n";
@@ -334,6 +337,9 @@ function onDocumentKeyDown(ev) {
 				let color = command.substring(11,19).replaceAll("_","");
 				if (color.length === 6) {
 					color = "0x" + color;
+				}
+				if (color.length === 7) {
+					color = "0x" + color.substring(1);
 				}
 				screenColor = Number(color);
 				ctx.fillStyle = hexToRgbA(screenColor.toString(16).toUpperCase().padStart(6, '0'));
